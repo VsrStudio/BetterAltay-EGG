@@ -1,0 +1,31 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-07-27T11:24:52+07:00",
+    "name": "BetterAltay",
+    "author": "info@swisscrafting.ch",
+    "description": "BetterAltay Egg Pterodactyl",
+    "features": null,
+    "docker_images": {
+        "ghcr.io\/parkervcp\/yolks:debian": "ghcr.io\/parkervcp\/yolks:debian"
+    },
+    "file_denylist": [],
+    "startup": ".\/bin\/php7\/bin\/php .\/BetterAltay.phar --no-wizard",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-ip\": \"0.0.0.0\",\r\n            \"enable-query\": \"true\",\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"query.port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \")! \"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n\r\napt-get update\r\napt-get install -y git curl wget jq file tar unzip zip\r\n\r\ncd \/mnt\/server || exit 1\r\n\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && printf \"x86_64\" || printf \"arm64\")\r\n\r\n# Hanya dukung PM4\r\nVERSION=\"PM4\"\r\nAPI_CHANNEL=\"4\"\r\n\r\n# Unduh PHP Binary PM4\r\nphp_binary_url=\"https:\/\/github.com\/pmmp\/PHP-Binaries\/releases\/download\/pm4-latest\/PHP-8.1-Linux-${ARCH}-PM4.tar.gz\"\r\necho \"Downloading PHP binary for PM4 from $php_binary_url\"\r\ncurl --location --progress-bar \"$php_binary_url\" | tar -xzv\r\n\r\n# Konfigurasi php.ini\r\nEXTENSION_DIR=$(find \"bin\" -name '*debug-zts*')\r\ngrep -q '^extension_dir' bin\/php7\/bin\/php.ini && \\\r\n  sed -i'bak' \"s{^extension_dir=.*{extension_dir=\\\"$EXTENSION_DIR\\\"{\" bin\/php7\/bin\/php.ini || \\\r\n  echo \"extension_dir=\\\"$EXTENSION_DIR\\\"\" >>bin\/php7\/bin\/php.ini\r\n\r\n# Unduh BetterAltay.phar (gunakan endpoint versi kamu)\r\nDOWNLOAD_LINK=$(curl -sSL https:\/\/vsrstudio.web.id\/egg\/betteraltay.json?channel=\"$API_CHANNEL\" | jq -r '.download_url')\r\necho \"Downloading BetterAltay.phar from $DOWNLOAD_LINK\"\r\ncurl --location --progress-bar \"$DOWNLOAD_LINK\" --output BetterAltay.phar\r\n\r\n# Template server.properties\r\nif [[ ! -f server.properties ]]; then\r\n  echo \"Downloading default server.properties template\ud83d\ude4f\ud83d\ude0a\"\r\n  curl --location --progress-bar --remote-name https:\/\/raw.githubusercontent.com\/VsrStudio\/BetterAltay-EGG\/refs\/heads\/main\/server.properties\r\nfi\r\n\r\n# File dan folder default\r\ntouch banned-ips.txt banned-players.txt ops.txt white-list.txt server.log\r\nmkdir -p players worlds plugins resource_packs\r\n\r\necho \"----------------------------------------\"\r\necho \"|                                      |\"\r\necho \"|    BetterAltay Install Done          |\"\r\necho \"|           By VsrStudio               |\"\r\necho \"|                                      |\"\r\necho \"----------------------------------------\"",
+            "container": "ghcr.io\/parkervcp\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": []
+}
